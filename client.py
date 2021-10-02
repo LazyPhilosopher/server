@@ -39,4 +39,5 @@ def send(msg):
 send("Geologist II")
 send("Staff Scientist")
 send("Assistant Professor")
+send(DISCONNECT_MESSAGE)
 

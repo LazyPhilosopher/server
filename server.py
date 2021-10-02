@@ -25,7 +25,7 @@ def send(conn, msg):
     conn.send(send_length)
     conn.send(message)
 
-def handle_client(conn, addr):
+def handle_client(conn, addr, lock):
     print(f"[SERVER]> {addr} connected.")
     
     connected = True
@@ -40,21 +40,25 @@ def handle_client(conn, addr):
                 print(f"[{addr}]> {msg}")
             #send(conn, "Message was received")
             
+            lock.acquire()
             response = func.get_employee_by_job(mycursor, msg)
+            lock.release()
+
             for i in range(len(response)):
                 temp_json = json.dumps(response[i])
-                time.sleep(30)
+                #time.sleep(10)
                 send(conn, temp_json)
             send(conn, FINISHED_MESSAGE)
                 #print(temp_json)
     conn.close()
 
 def start():
+    lock = threading.Lock()
     server.listen()
     while True:
         print(f"[SERVER]> Listening on {ADDR}...")
         conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
+        thread = threading.Thread(target=handle_client, args=(conn, addr, lock))
         thread.start()
         #print(f"[SERVER]> Now active threads: {threading.active_count() - 1}")
 
